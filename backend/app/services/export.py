@@ -1,8 +1,13 @@
-"""数据导出业务规则：状态流转、字段校验与筛选口径都收在这里。"""
+"""数据导出业务规则：状态流转、字段校验与筛选口径都收在这里。
+
+导出对象若关联取证封存（封存编号或快照编号），开始导出前消费其封存证据清单：
+只有清单判定为可交付（已封存整件 / 待作废补充件）时才放行，其余状态一律拦下。
+"""
 from __future__ import annotations
 
 from typing import Any
 
+from app.services.forensic import deliverable_summary_for
 from app.store import store
 
 MODULE = "export"
@@ -59,7 +64,21 @@ class ExportService:
         target = ACTION_RULES[action]
         if target not in STATUS_ORDER:
             return None, f"目标状态「{target}」不在允许的状态序列里"
+        message = f"导出任务已{action}"
+        if action == "开始导出":
+            # 消费取证封存的证据清单：清单判定不可交付时拦下导出
+            summary = deliverable_summary_for(str(entry.get("导出对象") or ""))
+            if summary is not None:
+                if not summary["可交付"]:
+                    return None, (
+                        f"封存{summary['封存编号']}当前状态「{summary['status']}」不可交付，"
+                        "导出已拦下，请等待封存齐备或重签恢复"
+                    )
+                message += (
+                    f"；封存{summary['封存编号']}可交付证据"
+                    f"{len(summary['可交付证据'])}份（{summary['交付类型']}）"
+                )
         entry["status"] = target
         entry["pending"] = target != STATUS_ORDER[-1]
         entry["abnormal"] = action in NEGATIVE_ACTIONS
-        return entry, f"导出任务已{action}"
+        return entry, message

@@ -12,6 +12,7 @@ const DataService = () => import('@/views/data_service/index.vue')
 const Alert = () => import('@/views/alert/index.vue')
 const UserGroup = () => import('@/views/user_group/index.vue')
 const Snapshot = () => import('@/views/snapshot/index.vue')
+const Forensic = () => import('@/views/forensic/index.vue')
 const Scheduler = () => import('@/views/scheduler/index.vue')
 const Cache = () => import('@/views/cache/index.vue')
 const Pipeline = () => import('@/views/pipeline/index.vue')
@@ -35,6 +36,7 @@ const router = createRouter({
     { path: '/alert', name: 'alert', component: Alert },
     { path: '/user_group', name: 'user_group', component: UserGroup },
     { path: '/snapshot', name: 'snapshot', component: Snapshot },
+    { path: '/forensic', name: 'forensic', component: Forensic },
     { path: '/scheduler', name: 'scheduler', component: Scheduler },
     { path: '/cache', name: 'cache', component: Cache },
     { path: '/pipeline', name: 'pipeline', component: Pipeline },
